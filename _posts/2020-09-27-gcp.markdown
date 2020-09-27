@@ -1,0 +1,48 @@
+---
+layout: post
+title:  "Google cloud platform notes"
+date:   2020-09-27 11:35:02 +0700
+categories: jekyll update
+---
+
+<!-- - Google-cloud setting up OS Login: -->
+<!-- abc [Setting up OS Login][gcp-os-login-docs] vv. -->
+<!-- [gcp-os-login-docs]: https://cloud.google.com/compute/docs/instances/managing-instance-access -->
+- Google-cloud setting up OS Login:
+Check out the [Setting up OS Login][gcp-os-login-docs] for more info.
+
+[gcp-os-login-docs]: https://cloud.google.com/compute/docs/instances/managing-instance-access
+
+- Install google-cloud-sdk:
+{% highlight shell %}
+~$ sudo snap install google-cloud-sdk --classic
+#=> google-cloud-sdk 311.0.0 from Cloud SDK (google-cloud-sdk✓) installed
+{% endhighlight %}
+- Google-cloud login:
+{% highlight shell %}
+~$ gcloud auth login --no-launch-browser
+#=> Go to the following link in your browser:
+#=> ...
+#=> Enter verification code:...
+#=> You are now logged in as [...].
+#=> Your current project is [...].  You can change this setting by running:
+#=>   $ gcloud config set project PROJECT_ID
+{% endhighlight %}
+- Google-cloud set project:
+{% highlight shell %}
+~$ gcloud config set project <PROJECT_ID>
+#=> Updated property [core/project].
+{% endhighlight %}
+- Get the OS Login profile for the current user:
+{% highlight shell %}
+~$ gcloud compute os-login describe-profile
+#=> Describe the OS Login profile for the current user
+{% endhighlight %}
+- Remove os-login ssh-keys:
+{% highlight shell %}
+~$ gcloud compute os-login ssh-keys remove --key=<sshPublicKeys>
+{% endhighlight %}
+- Add os-login ssh-keys:
+{% highlight shell %}
+~$ gcloud compute os-login ssh-keys add --key-file .ssh/id_rsa.pub --ttl 0
+{% endhighlight %}
