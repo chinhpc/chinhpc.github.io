@@ -1,0 +1,34 @@
+---
+layout: post
+title:  "QEMU basic usage notes"
+date:   2020-11-15 3:29:02 +0700
+categories: jekyll update
+---
+
+- Makefile for creating basic QEMU machine:
+{% highlight shell %}
+# qemu-img create -f qcow2 MyDisk.qcow2 55G
+
+common_args= \
+ -m 4G \
+ -smp 2,cores=2 \
+ -cpu Penryn,vendor=GenuineIntel \
+ -machine q35,accel=whpx \
+ -smbios type=2 \
+ -vga virtio -display gtk,show-cursor=on \
+ -device ich9-intel-hda -device hda-output \
+ -usb -device usb-kbd -device usb-mouse -device usb-tablet \
+ -device ich9-ahci,id=sata \
+ -device ide-hd,bus=sata.0,drive=SystemDisk \
+ -drive id=SystemDisk,file=MyDisk.qcow2,if=none,format=qcow2,index=0 \
+ -device e1000-82545em,netdev=net0,id=net0,mac=52:54:00:c9:18:27 \
+ -netdev user,id=net0,hostfwd=tcp::22-:22
+
+install:
+	qemu-system-x86_64 ${common_args} \
+	 -cdrom /d/DATA/soft/xubuntu-16.04.6-desktop-amd64.iso \
+	 -boot d
+
+boot:
+	qemu-system-x86_64 ${common_args}
+{% endhighlight %}
