@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "QEMU basic usage notes"
+title:  "QEMU basic usage"
 date:   2020-11-15 3:29:02 +0700
 categories: jekyll update
 ---

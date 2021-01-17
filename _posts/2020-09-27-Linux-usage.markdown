@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Setup OS notes"
+title:  "Linux usage"
 date:   2020-09-27 15:20:02 +0700
 categories: jekyll update
 ---
