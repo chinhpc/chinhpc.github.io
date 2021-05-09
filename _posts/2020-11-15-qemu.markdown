@@ -1,0 +1,86 @@
+---
+layout: single
+title:  "QEMU basic usage"
+date:   2020-11-15 3:29:02 +0700
+categories: QEMU virtualization
+---
+
+- Makefile for creating basic QEMU machine:
+
+- ## x86 machine:
+{% capture code %}{% raw %}
+mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
+mkfile_dir := $(dir $(mkfile_path))
+
+img_snapshot= MyDisk.qcow2
+iso= ubuntu-14.04.6-server-amd64.iso
+
+common_args= \
+ -m 5G \
+ -smp 2,cores=2 \
+ -cpu Penryn,vendor=GenuineIntel \
+ -machine q35,accel=tcg \
+ -smbios type=2 \
+ -vga std \
+ -device ich9-intel-hda -device hda-output \
+ -usb -device usb-kbd -device usb-mouse -device usb-tablet \
+ -device ich9-ahci,id=sata \
+ -device ide-hd,bus=sata.0,drive=SystemDisk \
+ -drive id=SystemDisk,file=$(mkfile_dir)MyDisk.qcow2,if=none,format=qcow2,index=0 \
+ -device e1000-82545em,netdev=net0,id=net0,mac=52:54:00:c9:18:27 \
+ -netdev user,id=net0,hostfwd=tcp::2233-:22
+
+all: boot
+
+install:
+ifeq (,$(wildcard $(mkfile_dir)$(img_snapshot)))
+	qemu-img create -f qcow2 $(mkfile_dir)$(img_snapshot) 55G
+endif
+	qemu-system-x86_64 ${common_args} \
+	 -cdrom $(mkfile_dir)$(iso) \
+	 -boot d
+
+boot:
+	qemu-system-x86_64 ${common_args}
+{% endraw %}{% endcapture %}
+{% include code.html lang="make" code=code %}
+
+- ## ARM machine:
+{% capture code %}{% raw %}
+THIS_MAKEFILE_PATH:=$(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST))
+THIS_DIR:=$(shell cd $(dir $(THIS_MAKEFILE_PATH));pwd)
+THIS_MAKEFILE:=$(notdir $(THIS_MAKEFILE_PATH))
+
+img_snapshot= MyDisk.qcow2
+iso= ubuntu-18.04.5-server-arm64.iso
+flash0= flash0.img
+flash1= flash1.img
+
+common_args= -m 6G -cpu cortex-a72 -smp 4,cores=2 -M virt,accel=tcg  \
+ -device rtl8139,netdev=net0 -netdev user,id=net0,hostfwd=tcp::2233-:22 \
+ -drive if=pflash,format=raw,file=flash0.img,readonly \
+ -drive if=pflash,format=raw,file=flash1.img \
+ -device virtio-scsi-device -drive if=none,file=${THIS_DIR}/${img_snapshot},format=qcow2,index=0,id=hd0 \
+ -device virtio-blk-device,drive=hd0 \
+ -vga std -display gtk,show-cursor=on \
+ -device nec-usb-xhci -device usb-tablet -device usb-kbd \
+ -device virtio-gpu-pci
+
+all: boot
+
+install:
+ifeq (,$(wildcard ${THIS_DIR}/${img_snapshot}))
+	qemu-img create -f qcow2 ${THIS_DIR}/${img_snapshot} 55G
+endif
+ifeq (,$(wildcard ${THIS_DIR}/${flash0}))
+	truncate -s 64M ${THIS_DIR}/${flash0}
+	truncate -s 64M ${THIS_DIR}/${flash1}
+	dd if=QEMU_EFI.fd of=${flash0} conv=notrunc
+endif
+	qemu-system-aarch64w ${common_args} \
+	 -device scsi-cd,drive=cdrom \
+	 -drive file=${THIS_DIR}/${iso},id=cdrom,if=none,media=cdrom
+boot:
+	qemu-system-aarch64w ${common_args}
+{% endraw %}{% endcapture %}
+{% include code.html lang="make" code=code %}

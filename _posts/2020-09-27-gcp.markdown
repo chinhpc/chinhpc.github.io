@@ -1,0 +1,56 @@
+---
+layout: single
+title:  "Google cloud platform"
+date:   2020-09-27 11:35:02 +0700
+categories: Google cloud
+---
+
+- Google-cloud setting up OS Login:
+Check out the [Setting up OS Login][gcp-os-login-docs] for more info.
+
+[gcp-os-login-docs]: https://cloud.google.com/compute/docs/instances/managing-instance-access
+
+- Install google-cloud-sdk:
+{% capture code %}{% raw %}
+sudo snap install google-cloud-sdk --classic
+#=> google-cloud-sdk 311.0.0 from Cloud SDK (google-cloud-sdk✓) installed
+{% endraw %}{% endcapture %}
+{% include code.html lang="shell_session" code=code %}
+
+- Google-cloud login:
+{% capture code %}{% raw %}
+gcloud auth login --no-launch-browser
+#=> Go to the following link in your browser:
+#=> ...
+#=> Enter verification code:...
+#=> You are now logged in as [...].
+#=> Your current project is [...].  You can change this setting by running:
+#=>   $ gcloud config set project PROJECT_ID
+{% endraw %}{% endcapture %}
+{% include code.html lang="shell_session" code=code %}
+
+- Google-cloud set project:
+{% capture code %}{% raw %}
+gcloud config set project <PROJECT_ID>
+#=> Updated property [core/project].
+{% endraw %}{% endcapture %}
+{% include code.html lang="shell_session" code=code %}
+
+- Get the OS Login profile for the current user:
+{% capture code %}{% raw %}
+gcloud compute os-login describe-profile
+#=> Describe the OS Login profile for the current user
+{% endraw %}{% endcapture %}
+{% include code.html lang="shell_session" code=code %}
+
+- Remove os-login ssh-keys:
+{% capture code %}{% raw %}
+gcloud compute os-login ssh-keys remove --key=<sshPublicKeys>
+{% endraw %}{% endcapture %}
+{% include code.html lang="shell_session" code=code %}
+
+- Add os-login ssh-keys:
+{% capture code %}{% raw %}
+gcloud compute os-login ssh-keys add --key-file .ssh/id_rsa.pub --ttl 0
+{% endraw %}{% endcapture %}
+{% include code.html lang="shell_session" code=code %}
